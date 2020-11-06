@@ -28,7 +28,7 @@ $Items = $5Min, $10Min
 
 
 
-function Show-PTNotification {
+function Show-TTTNotification {
     <#
         .SYNOPSIS
         Display activity based on string passed and default time
@@ -78,7 +78,7 @@ $CurrentTimer = @{
 
 $Resume = {
     Write-Host "$(Get-Date): Resumed Timer"
-    Start-PTActivity @CurrentTimer
+    Start-TTTActivity @CurrentTimer
 }
 
 $Pause = {
@@ -92,7 +92,7 @@ $Pause = {
     New-BurntToastNotification @ToastSplat -ActivatedAction $Resume
 }
 
-function New-PTNotif {
+function New-TTTNotif {
     [CmdletBinding()]
     param (
         [string] $Activity,
@@ -139,9 +139,9 @@ function New-PTNotif {
 }
 
 
-New-PTNotif -Activity "Pomodoro Timer"
+New-TTTNotif -Activity "Pomodoro Timer"
 
-function Start-PTActivity {
+function Start-TTTActivity {
     <#
         .SYNOPSIS
         Pomodoro Timer for a given activity
@@ -164,7 +164,7 @@ function Start-PTActivity {
         [TimeSpan]$StartPoint = (New-TimeSpan)
     )
 
-    New-PTNotif -Activity ($Activity + " starting soon...") -Remaining "Prepare Yourself!"
+    New-TTTNotif -Activity ($Activity + " starting soon...") -Remaining "Prepare Yourself!"
     Start-Sleep -Seconds 5
 
     $StartTime = Get-Date
@@ -232,7 +232,7 @@ function Start-PTActivity {
         Elapsed   = '{0:n0} minutes' -f $Duration
         Percent   = 1.0
     }
-    New-PTNotif @NotifData
+    New-TTTNotif @NotifData
     Start-Sleep -Seconds 5
 }
 
@@ -250,6 +250,6 @@ $Cycle = @(
 
 while (1) {
     foreach ($action in $Cycle) {
-        Start-PTActivity -Activity $action[0] -Duration $action[1]
+        Start-TTTActivity -Activity $action[0] -Duration $action[1]
     }
 }

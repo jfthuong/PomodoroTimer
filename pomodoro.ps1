@@ -98,7 +98,8 @@ function New-TTTNotif {
         [string] $Activity,
         [string] $Elapsed = "Not Started",
         [string] $Remaining = "N/A",
-        [string] $Percent = 0
+        [string] $Percent = 0,
+        [string] $NotifID = $ToastID
     )
 
     $Progress = New-BTProgressBar -Status 'Elapsed' -Value 'Percent'
@@ -113,7 +114,7 @@ function New-TTTNotif {
     }
     $ToastSplat = @{
         Text             = 'Activity', 'Remaining'
-        UniqueIdentifier = $ToastID
+        UniqueIdentifier = $NotifID
         DataBinding      = $DataBinding
         Header           = $PTHeader
         Button           = $StopBtn
@@ -122,7 +123,6 @@ function New-TTTNotif {
     }
     if ($Version71) {
         New-BurntToastNotification @ToastSplat -ActivatedAction $Pause
-        # New-BurntToastNotification @ToastSplat
     }
     else {
         New-BurntToastNotification @ToastSplat
@@ -231,6 +231,7 @@ function Start-TTTActivity {
         Remaining = 'Finished'
         Elapsed   = '{0:n0} minutes' -f $Duration
         Percent   = 1.0
+        NotifID   = $ToastID + "End"
     }
     New-TTTNotif @NotifData
     Start-Sleep -Seconds 5

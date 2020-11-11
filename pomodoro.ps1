@@ -75,21 +75,30 @@ $CurrentTimer = @{
     Duration = 0
     StartPoint = (New-TimeSpan)
 }
+$TimerStatus = "Started"
 
 $Resume = {
+    $Global:TimerStatus = "Resumed"
     Write-Host "$(Get-Date): Resumed Timer"
     Start-TTTActivity @CurrentTimer
 }
 
 $Pause = {
-    Write-Host "$(Get-Date): Paused Timer"
-    $ToastSplat = @{
-        Text             = 'Paused', 'Click to resume'
-        UniqueIdentifier = $ToastID
-        Header           = $PTHeader
-        AppLogo          = $TomatoPath
+    Write-Host $Event.SourceArgs[1].Arguments
+    if ($Event.SourceArgs[1].Arguments -eq 'dismiss') {
+        $Global:TimerStatus = "Finished"
+        exit
+    } else {
+        $Global:TimerStatus = "Paused"
+        Write-Host "$(Get-Date): Paused Timer"
+        $ToastSplat = @{
+            Text             = 'Paused', 'Click to resume'
+            UniqueIdentifier = $ToastID
+            Header           = $PTHeader
+            AppLogo          = $TomatoPath
+        }
+        New-BurntToastNotification @ToastSplat -ActivatedAction $Resume
     }
-    New-BurntToastNotification @ToastSplat -ActivatedAction $Resume
 }
 
 function New-TTTNotif {
@@ -122,7 +131,7 @@ function New-TTTNotif {
         AppLogo          = $TomatoPath
     }
     if ($Version71) {
-        New-BurntToastNotification @ToastSplat -ActivatedAction $Pause
+        New-BurntToastNotification @ToastSplat -ActivatedAction $Pause -DismissedAction {exit}
     }
     else {
         New-BurntToastNotification @ToastSplat
@@ -214,7 +223,7 @@ function Start-TTTActivity {
         }
         $Status = Update-BTNotification -UniqueIdentifier $ToastID -DataBinding $DataBindingUpdate
 
-        if (($Status -ne "Succeeded") -and (!$Version71)) {
+        if ((($Status -ne "Succeeded") -and (!$Version71)) -or ($TimerStatus -eq "Finished") ) {
             Write-Host "Pomodoro Timer has been ended"
             exit
         }
